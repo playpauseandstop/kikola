@@ -52,6 +52,10 @@ Contents
 
 Now ``kikola`` project consist of:
 
+- contrib
+
+  - basicsearch
+
 - core
 
   - context_processors
