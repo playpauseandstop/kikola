@@ -18,4 +18,4 @@ def search(request):
         form = form_cls(request=request)
 
     context.update({'form': form})
-    return render_to_response('basicsearch/search.html', context)
+    return render_to_response(SEARCH_TEMPLATE_NAME, context)

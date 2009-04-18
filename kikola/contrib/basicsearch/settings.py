@@ -27,3 +27,8 @@ SEARCH_QUERY_MAX_LENGTH = getattr(settings, 'SEARCH_QUERY_MAX_LENGTH', 64)
 
 # Number of search results, rendering at search page
 SEARCH_RESULTS_PER_PAGE = getattr(settings, 'SEARCH_RESULTS_PER_PAGE', 10)
+
+# Template used for rendering search results
+SEARCH_TEMPLATE_NAME = getattr(settings,
+                               'SEARCH_TEMPLATE_NAME',
+                               'basicsearch/search.html')

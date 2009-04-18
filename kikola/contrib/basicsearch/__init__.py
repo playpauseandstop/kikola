@@ -79,6 +79,12 @@ Django's FlatPages use next config::
         }
     }
 
+SEARCH_NOT_FOUND_MESSAGE
+------------------------
+
+Default search "not found" message. By default: ``Any objects was found by
+your query.``
+
 SEARCH_QUERY_MIN_LENGTH
 -----------------------
 
@@ -94,10 +100,10 @@ SEARCH_RESULTS_PER_PAGE
 
 Number of search results, rendering at search page. By default: 10.
 
-More
-====
+SEARCH_TEMPLATE_NAME
+--------------------
 
-To customize search results rendering - just add ``basicsearch/search.html``
-template to your project ``TEMPLATE_DIRS``.
+Template used for rendering search results. By default:
+``basicsearch/search.html``.
 
 """
