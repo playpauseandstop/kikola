@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+{% load i18n %}
+<html dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" lang="{{ LANGUAGE_CODE }}" xml:lang="{{ LANGUAGE_CODE }}" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>{% if search_query %}{{ search_query }} &ndash; {% endif %}{% blocktrans with site.name as site_name %}{{ site_name }} Search{% endblocktrans %}</title>
+
+    <meta http-equiv="Content-Language" content="{{ LANGUAGE_CODE }}" />
+    <meta http-equiv="Content-Type" content="text/html; encoding=utf-8" />
+</head>
+
+<body>
+
+    <h1>{% blocktrans with site.name as site_name %}{{ site_name }} Search{% endblocktrans %}</h1>
+    <form action="{% url basicsearch %}" method="get">
+        {{ form.as_p }}
+        <p class="buttons"><input type="submit" value="{% trans 'Search' %}" /></p>
+    </form>
+
+    {% if search_error %}
+    <h2 class="warning">{{ search_error }}</h2>
+    {% else %}
+    <dl class="objects">
+        {% for obj in search_results %}
+        <dt><a href="{{ obj.link }}">{{ obj.title }}</a></dt>
+        {% if obj.description %}<dd>{{ obj.description }}</dd>{% endif %}
+        {% endfor %}
+    </dl>
+
+    {% if search_has_next_page or search_has_previous_page %}
+    <ul class="paginator">
+        {% if search_has_previous_page %}<li class="first"><a href="?page=1">{% trans '&laquo; First page' %}</a></li>
+        <li class="previous"><a href="?page={{ search_previous_page }}">{% trans '&lsaquo; Previous page' %}</a></li>{% endif %}
+        {% if search_has_next_page %}<li class="next"><a href="?page={{ search_next_page }}">{% trans 'Next page &rsaquo;' %}</a></li>
+        <li class="last"><a href="?page={{ search_pages_count }}">{% trans 'Last page &raquo;' %}</a></li>{% endif %}
+    </ul>
+    {% endif %}
+    {% endif %}
+
+</body>
+
+</html>
