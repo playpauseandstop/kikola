@@ -29,7 +29,7 @@ You can install ``kikola`` via::
     sudo python setup.py install
 
 from ``kikola`` root directory. Also you can to install ``kikola`` via
-**`easy_install`_**::
+`easy_install`_::
 
     sudo easy_install kikola
 
@@ -41,6 +41,7 @@ repository::
 and add ``kikola`` directory path to your ``PYTHONPATH``.
 
 .. _`easy_install`: http://pypi.python.org/pypi/setuptools
+.. _git: http://git.or.cz/
 
 Contents
 ========
