@@ -8,16 +8,20 @@ kikola
 4. Contents_
 5. More_
 
+----
+
 Introduction
 ============
 
-**Kikola** is a collection of Django's custom context processors, form fields
+Kikola_ is a collection of Django's custom context processors, form fields
 and widgets, middlewares, model fields, reusable apps and template tags.
+
+.. _Kikola: http://github.com/playpauseandstop/kikola
 
 Requirements
 ============
 
-- Django_ (>=1.0)
+* Django_ (>=1.0)
 
 .. _Django: http://www.djangoproject.com/
 
@@ -96,4 +100,4 @@ More
 
 If you find bug in Kikola, please send it via `GitHub issues`_.
 
-.. _`GitHub issues`: http://github.com/playapauseandstop/kikola/issues
+.. _`GitHub issues`: http://github.com/playpauseandstop/kikola/issues
