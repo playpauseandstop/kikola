@@ -1,6 +1,7 @@
 """
 Custom model fields for Django.
 """
+import types
 
 from django.conf import settings
 from django.db import models
@@ -60,7 +61,7 @@ class JSONField(models.TextField):
 
 class PickleField(models.TextField):
     """
-    Model field that stores all Python object as pickled string.
+    Custom field that enables to store pickled Python objects.
     """
     __metaclass__ = models.SubfieldBase
 
@@ -68,15 +69,33 @@ class PickleField(models.TextField):
     serialize = False
 
     def get_db_prep_value(self, value):
+        # Make able to store Django model objects in ``PickleField``
+        if hasattr(value, 'prepare_database_save') and \
+           isinstance(getattr(value, 'prepare_database_save'),
+                      types.LambdaType):
+            delattr(value, 'prepare_database_save')
+
         return pickle.dumps(value)
 
+    def get_default(self):
+        if self.has_default():
+            if callable(self.default):
+                return self.default()
+            return self.default
+        return super(PickleField, self).get_default()
+
     def to_python(self, value):
+        # Make able to store Django model objects in ``PickleField``
+        if hasattr(value, 'prepare_database_save'):
+            value.prepare_database_save = \
+                lambda unused: PickleField().get_db_prep_value(value)
+
         if not isinstance(value, basestring):
             return value
 
         try:
-            return pickle.loads(value)
-        except ValueError:
+            return pickle.loads(smart_str(value))
+        except (EOFError, IndexError, KeyError, ValueError):
             # If pickle could not loads from string it's means that it's Python
             # string saved to PickleField.
             return value
