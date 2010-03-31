@@ -1,8 +1,6 @@
 """
 Custom model fields for Django.
 """
-import types
-
 from django.conf import settings
 from django.db import models
 from django.utils import simplejson
@@ -69,12 +67,6 @@ class PickleField(models.TextField):
     serialize = False
 
     def get_db_prep_value(self, value):
-        # Make able to store Django model objects in ``PickleField``
-        if hasattr(value, 'prepare_database_save') and \
-           isinstance(getattr(value, 'prepare_database_save'),
-                      types.LambdaType):
-            delattr(value, 'prepare_database_save')
-
         return pickle.dumps(value)
 
     def get_default(self):
@@ -85,11 +77,6 @@ class PickleField(models.TextField):
         return super(PickleField, self).get_default()
 
     def to_python(self, value):
-        # Make able to store Django model objects in ``PickleField``
-        if hasattr(value, 'prepare_database_save'):
-            value.prepare_database_save = \
-                lambda unused: PickleField().get_db_prep_value(value)
-
         if not isinstance(value, basestring):
             return value
 
@@ -110,3 +97,13 @@ class URLField(models.URLField):
                     'verify_exists': self.verify_exists}
         defaults.update(kwargs)
         return super(URLField, self).formfield(**defaults)
+
+
+# Make able to store Django model objects in ``PickleField``
+def picklefield_prepare_database_save(obj, field):
+    if isinstance(field, PickleField):
+        return field.get_db_prep_save(obj)
+    return super(models.Model, obj).prepare_database_save(field)
+
+
+models.Model.prepare_database_save = picklefield_prepare_database_save
