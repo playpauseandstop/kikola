@@ -100,10 +100,13 @@ class URLField(models.URLField):
 
 
 # Make able to store Django model objects in ``PickleField``
-def picklefield_prepare_database_save(obj, field):
-    if isinstance(field, PickleField):
-        return field.get_db_prep_save(obj)
-    return super(models.Model, obj).prepare_database_save(field)
+def picklefield(func):
+    def wrapper(obj, field):
+        if isinstance(field, PickleField):
+            return field.get_db_prep_save(obj)
+        return func(obj, field)
+    return wrapper
 
 
-models.Model.prepare_database_save = picklefield_prepare_database_save
+models.Model.prepare_database_save = \
+    picklefield(models.Model.prepare_database_save)
