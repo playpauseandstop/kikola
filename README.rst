@@ -62,6 +62,12 @@ Now ``kikola`` project consist of:
 
     - path
 
+  - decorators
+
+    - render_to
+    - render_to_json
+    - smart_datetime
+
   - sitemaps
 
     - IndexSitemap
