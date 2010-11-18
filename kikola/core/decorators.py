@@ -1,11 +1,11 @@
+import datetime
+
 try:
     import json
 except ImportError:
     from django.utils import simplejson as json
 
-import datetime
-
-from functools import wraps
+from functools import partial, wraps
 
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
@@ -15,10 +15,47 @@ from django.template import RequestContext
 from django.template.defaultfilters import date as date_filter
 
 
-__all__ = ('render_to', 'render_to_json', 'smart_datetime')
+__all__ = ('memoized', 'render_to', 'render_to_json', 'smart_datetime')
 
 
 TODAY = datetime.date.today
+
+
+class memoized(object):
+    """
+    Decorator that caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is returned, and
+    not re-evaluated.
+
+    Original posted on: http://wiki.python.org/moin/PythonDecoratorLibrary
+    """
+    def __init__(self, func):
+        self.cache = {}
+        self.func = func
+
+    def __call__(self, *args):
+        try:
+            return self.cache[args]
+        except KeyError:
+            value = self.func(*args)
+            self.cache[args] = value
+            return value
+        except TypeError:
+            # uncachable -- for instance, passing a list as an argument.
+            # Better to not cache than to blow up entirely.
+            return self.func(*args)
+
+    def __get__(self, obj, objtype):
+        """
+        Support instance methods.
+        """
+        return partial(self.__call__, obj)
+
+    def __repr__(self):
+        """
+        Return the function's docstring.
+        """
+        return self.func.__doc__
 
 
 def render_to(template_path):
