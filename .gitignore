@@ -1,5 +1,11 @@
 *.pyc
 *.pyo
+
 build/
 dist/
+env/
+
 MANIFEST
+settings_local.py
+settings_testing_local.py
+testproject.db
