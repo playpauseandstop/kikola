@@ -21,7 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
 
+    'kikola',
+
     'testproject.core',
+    'testproject.templatetags',
 ]
 
 # Language and locale settings
