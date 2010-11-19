@@ -2,50 +2,45 @@
 kikola
 ======
 
-1. Introduction_
-2. Requirements_
-3. Installation_
-4. Contents_
-5. More_
-
-----
-
-Introduction
-============
-
-Kikola_ is a collection of Django's custom context processors, form fields
-and widgets, middlewares, model fields, reusable apps and template tags.
-
-.. _Kikola: http://github.com/playpauseandstop/kikola
+Collection of Django's custom context processors, form fields and widgets,
+middlewares, model fields, reusable apps and template tags.
 
 Requirements
 ============
 
-* Django_ (>=1.0)
+* Python_ 2.5 or higher
+* Django_ 1.0 or higher
 
+.. _Python: http://www.python.org/
 .. _Django: http://www.djangoproject.com/
 
 Installation
 ============
 
-You can install ``kikola`` via::
+*On most UNIX-like systems, you'll probably need to run these commands as root
+or using sudo.*
 
-    sudo python setup.py install
+To install use::
 
-from ``kikola`` root directory. Also you can to install ``kikola`` via
-`easy_install`_::
+    $ pip install kikola
 
-    sudo easy_install kikola
+Or::
 
-To use latest version of ``kikola`` in your projects, clone ``kikola`` git_
-repository::
+    $ python setup.py install
 
-    git clone git://github.com/playpauseandstop/kikola.git
+Also, you can retrieve fresh version of ``kikola`` from `GitHub
+<http://github.com/playpauseandstop/kikola>`_::
 
-and add ``kikola`` directory path to your ``PYTHONPATH``.
+    $ git clone git://github.com/playpauseandstop/kikola.git
 
-.. _`easy_install`: http://pypi.python.org/pypi/setuptools
-.. _git: http://git.or.cz/
+and place ``kikola`` directory somewhere to ``PYTHONPATH`` (or ``sys.path``).
+
+License
+=======
+
+``kikola`` is licensed under the `BSD License
+<http://github.com/playpauseandstop/kikola/blob/master/LICENSE>`_.
+
 
 Contents
 ========
@@ -64,6 +59,7 @@ Now ``kikola`` project consist of:
 
   - decorators
 
+    - memoized
     - render_to
     - render_to_json
     - smart_datetime
@@ -101,13 +97,16 @@ Now ``kikola`` project consist of:
 
 - templatetags
 
-  - json_filters
+  - json_tags
 
     - jsonify
+
+  - twitter_tags
+
+    - twitterize
 
 More
 ====
 
-If you find bug in Kikola, please send it via `GitHub issues`_.
-
-.. _`GitHub issues`: http://github.com/playpauseandstop/kikola/issues
+Found a bug? Have a good idea for improving kikola? Head over to `GitHub`_ to
+create a new issue or fork.
