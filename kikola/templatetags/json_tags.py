@@ -1,24 +1,32 @@
 """
-kikola.templatetags.json_filters
-================================
+=============================
+kikola.templatetags.json_tags
+=============================
+
+Useful template filter to dumps Python var to JSON in templates.
 
 Installation
 ============
 
-Adds ``kikola`` to your project's ``settings`` ``INSTALLED_APPS`` var.
+Just add ``kikola`` to ``INSTALLED_APPS`` var of your project settings.
+
+Filters
+=======
 
 jsonify
 -------
 
-Custom template tag ``jsonify`` based on skam's snippet and comments for it.
-http://www.djangosnippets.org/snippets/201/
+Custom template filter ``jsonify`` based on `skam's snippet
+<http://www.djangosnippets.org/snippets/201/>`_ and comments for it.
+
+Don't forget to make resulted variable ``safe`` to use it inside textareas.
 
 Usage
 ~~~~~
 
 In templates::
 
-    {% load json_filters %}
+    {% load json_tags %}
     <pre class="python">{{ var|safe }}</pre>
     <pre class="json">{{ var|jsonify|safe }}</pre>
 
@@ -30,7 +38,7 @@ And when::
         'string': 'bar',
     }
 
-This outputs::
+Template renders as::
 
     <pre class="python">{'list': ['foo', 'bar'], 'bool': True, 'string': 'bar'}</pre>
     <pre class="json">{"list": ["foo", "bar"], "bool": true, "string": "bar"}</pre>
@@ -45,6 +53,6 @@ from django.utils import simplejson
 register = Library()
 
 
-def do_jsonify(obj, safe=False):
+@register.filter
+def jsonify(obj, safe=False):
     return simplejson.dumps(obj, cls=DjangoJSONEncoder)
-register.filter('jsonify', do_jsonify)
