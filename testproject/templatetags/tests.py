@@ -1,8 +1,8 @@
 import datetime
 
 from django.template import Context, Template
+from django.test import TestCase
 from django.utils.html import escape
-from django.utils.unittest import TestCase
 
 
 TEST_JSONIFY_TEMPLATE = '{{ var|jsonify }}'

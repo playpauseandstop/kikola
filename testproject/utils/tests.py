@@ -1,9 +1,13 @@
 import datetime
 
+from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.utils.encoding import smart_str
-from django.utils.unittest import TestCase
 
 from kikola.utils import *
+
+
+NOW = datetime.datetime.now()
 
 
 class Dummy(object):
@@ -104,6 +108,12 @@ class TestTimedelta(TestCase):
 
         result = timedelta_div(self.timedelta16800, self.timedelta1200)
         self.assertEqual(result, 14.0)
+
+    def test_timedelta_json_encoder(self):
+        url = reverse('timedelta_json_encoder')
+        response = self.client.get(url)
+        self.assertContains(response,
+                            '"timedelta": "%d:%d"' % (NOW.hour, NOW.minute))
 
     def test_timedelta_seconds(self):
         self.assertEqual(timedelta_seconds(self.timedelta), 0)
