@@ -1,3 +1,5 @@
+import datetime
+
 from django.template import Context, Template
 from django.utils.html import escape
 from django.utils.unittest import TestCase
@@ -13,6 +15,11 @@ TEST_JSONIFY_VARS = (
     ('text', '"text"'),
     ([1, 2, 3], '[1, 2, 3]'),
     ({'a': 1}, '{"a": 1}'),
+)
+TEST_TIMEDELTA_TEMPLATE = '{{ var|timedelta }}'
+TEST_TIMEDELTA_TAGS = (
+    (datetime.timedelta(seconds=35250), '9:47'),
+    ('string', '')
 )
 TEST_TWITTERIZE_TEMPLATE = '{{ text|twitterize }}'
 TEST_TWITTERIZE_VARS = (
@@ -40,6 +47,14 @@ class TestTemplateTags(TestCase):
         for var, rendered in TEST_JSONIFY_VARS:
             context = Context({'var': var})
             self.assertEqual(template.render(context), escape(rendered))
+
+    def test_timedelta(self):
+        template = Template('{% load timedelta_tags %}' + \
+                            TEST_TIMEDELTA_TEMPLATE)
+
+        for var, rendered in TEST_TIMEDELTA_TAGS:
+            context = Context({'var': var})
+            self.assertEqual(template.render(context), rendered)
 
     def test_twitterize(self):
         template = Template('{% load twitter_tags %}' + \

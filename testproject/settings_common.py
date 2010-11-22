@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'testproject.core',
     'testproject.templatetags',
     'testproject.shortcuts',
+    'testproject.utils',
 ]
 
 # Language and locale settings
