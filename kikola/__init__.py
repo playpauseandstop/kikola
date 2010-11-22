@@ -11,7 +11,7 @@ apps, middlewares, context processors and other useful utilities.
 __all__ = ('get_version', )
 
 
-VERSION = (0, 5, 'beta')
+VERSION = (0, 5, None)
 
 
 def get_version(version=None):
