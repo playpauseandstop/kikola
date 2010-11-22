@@ -36,6 +36,7 @@ setup(
         'kikola.middleware',
         'kikola.shortcuts',
         'kikola.templatetags',
+        'kikola.utils',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

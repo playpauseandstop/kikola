@@ -105,9 +105,28 @@ Now ``kikola`` project consist of:
 
     - jsonify
 
+  - timedelta_tags
+
+    - timedelta
+
   - twitter_tags
 
     - twitterize
+
+- utils
+
+  - digits
+
+    - force_int
+
+  - timedelta
+
+    - TimedeltaJSONEncoder
+    - str_to_timedelta
+    - timedelta_average
+    - timedelta_div
+    - timedelta_seconds
+    - timedelta_to_str
 
 More
 ====
