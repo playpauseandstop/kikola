@@ -24,8 +24,8 @@ setup(
     author='Igor Davydenko',
     author_email='playpauseandstop@gmail.com',
     url='http://github.com/playpauseandstop/kikola/',
-    download_url='http://cloud.github.com/downloads/playpauseandstop/kikola/' \
-                 'kikola-%s.zip' % version,
+    download_url='https://github.com/playpauseandstop/kikola/tarball/%s' % \
+                 version,
     packages=[
         'kikola',
         'kikola.contrib',
