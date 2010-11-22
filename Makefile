@@ -15,5 +15,8 @@ distclean:
 	-rm -rf dist/
 	-rm MANIFEST
 
+manage:
+	$(manage) $(COMMAND)
+
 test:
-	$(manage) test {base,core,shortcuts,templatetags}
+	$(manage) test {base,core,shortcuts,templatetags,utils}
