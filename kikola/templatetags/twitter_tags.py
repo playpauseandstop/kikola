@@ -3,9 +3,12 @@
 kikola.templatetags.twitter_tags
 ================================
 
+Additional filter to parse twitter statuses in Django templates.
 
 Installation
 ============
+
+Just add ``kikola`` to ``INSTALLED_APPS`` var of your project settings.
 
 Filters
 =======

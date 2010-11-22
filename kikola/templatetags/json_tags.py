@@ -3,7 +3,7 @@
 kikola.templatetags.json_tags
 =============================
 
-Useful template filter to dumps Python var to JSON in templates.
+Template filter to dumps Python var to JSON in templates.
 
 Installation
 ============
