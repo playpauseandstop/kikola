@@ -95,6 +95,10 @@ Now ``kikola`` project consist of:
 
     - SmartMultilingualMiddleware
 
+- shortcuts
+
+  - conf
+
 - templatetags
 
   - json_tags
