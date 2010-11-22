@@ -23,8 +23,10 @@ INSTALLED_APPS = [
 
     'kikola',
 
+    'testproject.base',
     'testproject.core',
     'testproject.templatetags',
+    'testproject.shortcuts',
 ]
 
 # Language and locale settings
