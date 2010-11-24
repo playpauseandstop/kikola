@@ -4,6 +4,7 @@
 build/
 dist/
 env/
+env*/
 
 MANIFEST
 settings_local.py
