@@ -1,18 +1,27 @@
 """
 Custom model fields for Django.
 """
-from django.conf import settings
+
+import datetime
+import re
+
+from django import VERSION
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import simplejson
+from django.utils.encoding import smart_str
+from django.utils.translation import ugettext_lazy as _
 
-from kikola.forms import fields
-from kikola.forms.widgets import JSONWidget
+from kikola import forms
+from kikola.shortcuts import conf
+from kikola.utils import str_to_timedelta, timedelta_seconds
 
 
-__all__ = ('JSONField', 'PickleField', 'URLField')
+__all__ = ('JSONField', 'MonthField', 'PickleField', 'TimeDeltaField',
+           'URLField')
 
 
-if getattr(settings, 'USE_CPICKLE', False):
+if conf('USE_CPICKLE', False):
     import cPickle as pickle
 else:
     import pickle
@@ -21,8 +30,16 @@ else:
 class JSONField(models.TextField):
     """
     Model field that stores all Python object as JSON string.
+
+    You should set custom encoder class for dumps Python object to JSON data
+    via ``encoder_cls`` keyword argument. By default, ``DjangoJSONEncoder``
+    would be used.
     """
     __metaclass__ = models.SubfieldBase
+
+    def __init__(self, *args, **kwargs):
+        self.encoder_cls = kwargs.pop('encoder_cls', DjangoJSONEncoder)
+        super(JSONField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name):
         super(JSONField, self).contribute_to_class(cls, name)
@@ -36,11 +53,25 @@ class JSONField(models.TextField):
         setattr(cls, 'set_%s_json' % self.name, set_json)
 
     def formfield(self, **kwargs):
-        kwargs['widget'] = JSONWidget(attrs={'class': 'vLargeTextField'})
-        return super(JSONField, self).formfield(**kwargs)
+        defaults = {'form_class': forms.JSONField}
+        defaults.update(kwargs)
+        field = super(JSONField, self).formfield(**defaults)
 
-    def get_db_prep_value(self, value):
-        return simplejson.dumps(value)
+        if hasattr(field.widget, 'json_options') and \
+           not 'cls' in field.widget.json_options:
+            field.widget.json_options.update({'cls': self.encoder_cls})
+
+        return field
+
+    def get_default(self):
+        if self.has_default():
+            if callable(self.default):
+                return self.default()
+            return self.default
+        return super(JSONField, self).get_default()
+
+    def get_prep_value(self, value):
+        return simplejson.dumps(value, cls=self.encoder_cls)
 
     def to_python(self, value):
         if not isinstance(value, basestring):
@@ -50,11 +81,34 @@ class JSONField(models.TextField):
             return value
 
         try:
-            return simplejson.loads(value, encoding=settings.DEFAULT_CHARSET)
+            return simplejson.loads(value, encoding=conf('DEFAULT_CHARSET'))
         except ValueError, e:
             # If string could not parse as JSON it's means that it's Python
             # string saved to JSONField.
             return value
+
+
+class MonthField(models.DateField):
+    """
+    Field to store month values.
+
+    Originally, field store date with first day of the month.
+    """
+    __metaclass__ = models.SubfieldBase
+
+    description = _('Month')
+
+    def get_prep_value(self, value):
+        if not value:
+            return value
+
+        return value - datetime.timedelta(days=value.day - 1)
+
+    def to_python(self, value):
+        if not value:
+            return value
+
+        return value - datetime.timedelta(days=value.day - 1)
 
 
 class PickleField(models.TextField):
@@ -66,15 +120,15 @@ class PickleField(models.TextField):
     editable = False
     serialize = False
 
-    def get_db_prep_value(self, value):
-        return pickle.dumps(value)
-
     def get_default(self):
         if self.has_default():
             if callable(self.default):
                 return self.default()
             return self.default
         return super(PickleField, self).get_default()
+
+    def get_prep_value(self, value):
+        return pickle.dumps(value)
 
     def to_python(self, value):
         if not isinstance(value, basestring):
@@ -88,12 +142,62 @@ class PickleField(models.TextField):
             return value
 
 
+class TimeDeltaField(models.IntegerField):
+    """
+    Polished version of ``TimeDeltaField`` from
+    http://www.djangosnippets.org/snippets/1060/
+
+    The field stores Python's datetime.timedelta in an integer column.
+    """
+    __metaclass__ = models.SubfieldBase
+
+    default_error_messages = {
+        'invalid': _('This value must be a timedelta.'),
+    }
+    description = _('Timedelta')
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': forms.TimeDeltaField}
+        defaults.update(kwargs)
+        return super(TimeDeltaField, self).formfield(**defaults)
+
+    def get_prep_value(self, value):
+        if value is None or isinstance(value, int):
+            return value
+
+        if isinstance(value, basestring):
+            value = str_to_timedelta(value)
+
+            if value is None:
+                return self.null and None or 0
+
+        assert isinstance(value, datetime.timedelta), (value, type(value))
+        return timedelta_seconds(value)
+
+    def to_python(self, value):
+        if value is None or isinstance(value, datetime.timedelta):
+            return value
+
+        if isinstance(value, (int, long)):
+            return datetime.timedelta(seconds=value)
+
+        # Try to convert string time to timedelta instance
+        if isinstance(value, basestring):
+            new_value = str_to_timedelta(value)
+
+            if new_value is not None:
+                return new_value
+
+        # If cannot convert value to timedelta raise ``AssertionError``
+        assert False, (value, type(value))
+
+
 class URLField(models.URLField):
     """
     Custom field that enables to store absolute URL, not only schemed value.
     """
     def formfield(self, **kwargs):
-        defaults = {'form_class': fields.URLField,
+        defaults = {'form_class': forms.URLField,
                     'verify_exists': self.verify_exists}
         defaults.update(kwargs)
         return super(URLField, self).formfield(**defaults)
@@ -110,3 +214,13 @@ def picklefield(func):
 
 models.Model.prepare_database_save = \
     picklefield(models.Model.prepare_database_save)
+
+
+# Rename ``get_prep_value`` methods to ``get_db_prep_value`` for compatible
+# with Django < 1.2
+if VERSION[0] == 1 and VERSION[1] < 2:
+    fields = (JSONField, MonthField, PickleField, TimeDeltaField, URLField)
+    for field in fields:
+        if not hasattr(field, 'get_prep_value'):
+            continue
+        field.get_db_prep_value = field.get_prep_value

@@ -4,22 +4,26 @@ Custom forms widgets for Django.
 
 import datetime
 import re
+
 from time import strptime
 
+from django import forms
 from django.core.urlresolvers import NoReverseMatch, reverse
-from django.forms.widgets import HiddenInput, TextInput, PasswordInput
-from django.forms.widgets import Select, Textarea, Widget
+from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.util import flatatt
 from django.utils import simplejson
 from django.utils.dates import MONTHS, MONTHS_3
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 
+from kikola.utils import timedelta_to_str
 
-__all__ = ('AutocompleteWidget', 'CaptchaWidget', 'CaptchaTokenWidget',
-           'JSONWidget', 'SelectDateWidget', 'SpanWidget')
 
-class AutocompleteWidget(TextInput):
+__all__ = ('AutocompleteWidget', 'JSONWidget', 'SelectDateWidget',
+           'TimeDeltaWidget')
+
+
+class AutocompleteWidget(forms.TextInput):
     """
     Autocomplete widget to use with jquery-autocomplete plugin.
 
@@ -159,34 +163,29 @@ class AutocompleteWidget(TextInput):
                 self.set_current_choice(k)
                 return k
 
-class CaptchaWidget(PasswordInput):
-    """
-    Added to django.newforms.widgets.TextInput render_value argument.
-    """
-    input_type = 'text'
 
-class CaptchaTokenWidget(HiddenInput):
+class JSONWidget(forms.Textarea):
     """
+    Prettify dumps of all non-string JSON data, when string JSON data dumps
+    without quotes.
     """
-    def __init__(self, attrs=None, value=None):
-        super(CaptchaTokenWidget, self).__init__(attrs)
-        self.value = value
+    def __init__(self, *args, **kwargs):
+        self.json_options = kwargs.pop('json_options', {})
+        super(JSONWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None):
-        if self.value:
-            value = self.value
-        return super(CaptchaTokenWidget, self).render(name, value, attrs)
+        if not isinstance(value, basestring):
+            defaults = {'cls': DjangoJSONEncoder,
+                        'ensure_ascii': False,
+                        'indent': 4,
+                        'sort_keys': True}
+            defaults.update(self.json_options)
+            value = simplejson.dumps(value, **defaults)
 
-class JSONWidget(Textarea):
-    """
-    Prettify dumps of all non-string JSON data.
-    """
-    def render(self, name, value, attrs=None):
-        if not isinstance(value, basestring) and value is not None:
-            value = simplejson.dumps(value, indent=4, sort_keys=True)
         return super(JSONWidget, self).render(name, value, attrs)
 
-class SelectDateWidget(Widget):
+
+class SelectDateWidget(forms.Widget):
     """
     Extended version of django.newforms.extras.SelectDateWidget
 
@@ -249,10 +248,12 @@ class SelectDateWidget(Widget):
                     fields.append((k, v))
 
         if not fields:
-            raise TypeError('Date input format "%s" is broken.' % self.input_format)
+            raise TypeError('Date input format "%s" is broken.' % \
+                            self.input_format)
 
         self.fields = fields
-        self.input_format = self.input_format.replace('%b', '%m').replace('%B', '%m')
+        self.input_format = \
+            self.input_format.replace('%b', '%m').replace('%B', '%m')
 
     def render(self, name, value, attrs=None):
         try:
@@ -305,8 +306,8 @@ class SelectDateWidget(Widget):
             else:
                 local_attrs['id'] = field % id_
 
-            sel = Select(choices=_choices(pattern)).\
-                  render(sel_name, sel_value, local_attrs)
+            sel = forms.Select(choices=_choices(pattern)).\
+                        render(sel_name, sel_value, local_attrs)
             output.append(sel)
 
         return mark_safe('\n'.join(output))
@@ -325,20 +326,14 @@ class SelectDateWidget(Widget):
 
         return data.get(name, None)
 
-class SpanWidget(Widget):
+
+class TimeDeltaWidget(forms.TextInput):
     """
-    Custom widget that combine <span> tag with value as content and
-    <input type="hidden"> form field.
+    Custom widget to use with ``kikola.forms.TimeDeltaField`` field class.
     """
     def render(self, name, value, attrs=None):
-        if value is None:
-            value = ''
-
-        if isinstance(value, basestring):
-            value = force_unicode(value)
-
-        return mark_safe(u'<span%s>%s</span>\n%s' % (
-            flatatt(self.build_attrs(attrs)),
-            value,
-            HiddenInput().render(name, value)
-        ))
+        if isinstance(value, int):
+            value = timedelta_to_str(datetime.timedelta(seconds=value))
+        elif isinstance(value, datetime.timedelta):
+            value = timedelta_to_str(value)
+        return super(TimeDeltaWidget, self).render(name, value, attrs)
