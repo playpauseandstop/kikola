@@ -73,21 +73,29 @@ Now ``kikola`` project consist of:
   - fields
 
     - JSONField
+    - MonthField
     - PickleField
+    - TimeDeltaField
     - URLField
 
 - forms
 
   - fields
 
+    - JSONField
+    - TimeDeltaField
     - URLField
+
+  - forms
+
+    - TabbedForm
 
   - widgets
 
     - AutocompleteWidget
     - JSONWidget
     - SelectDateWidget
-    - SpanWidget
+    - TimeDeltaWidget
 
 - middleware
 
