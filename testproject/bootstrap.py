@@ -14,8 +14,6 @@ import os
 import shutil
 import sys
 
-from distutils.core import run_setup
-
 
 try:
     import pip

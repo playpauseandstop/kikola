@@ -1,1 +1,4 @@
+IPython
+
 -e svn+http://code.djangoproject.com/svn/django/trunk/#egg=Django
+-e git://github.com/django-extensions/django-extensions.git#egg=django-extensions

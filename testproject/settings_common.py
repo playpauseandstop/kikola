@@ -1,5 +1,7 @@
 import os
 
+from django import VERSION
+
 
 rel = lambda *x: os.path.abspath(os.path.join(os.path.dirname(__file__), *x))
 
@@ -12,7 +14,12 @@ CSRF_COOKIE_NAME = 'testproject_csrf'
 
 # Date and time settings
 FIRST_DAY_OF_WEEK = 1
-TIME_ZONE = None
+
+if VERSION[0] == 1 and VERSION[1] >= 2:
+    TIME_ZONE = None
+else:
+    import time
+    TIME_ZONE = time.tzname[0]
 
 # Installed applications
 INSTALLED_APPS = [
@@ -21,10 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
 
+    'django_extensions',
     'kikola',
 
     'testproject.base',
     'testproject.core',
+    'testproject.db',
     'testproject.templatetags',
     'testproject.shortcuts',
     'testproject.utils',
@@ -66,16 +75,18 @@ LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 
 # Messages settings
-MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
+if VERSION[0] == 1 and VERSION[1] >= 2:
+    MESSAGE_STORAGE = \
+        'django.contrib.messages.storage.fallback.FallbackStorage'
 
 # Middleware settings
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-)
+]
 
 # Session settings
 SESSION_COOKIE_NAME = 'testproject_sid'

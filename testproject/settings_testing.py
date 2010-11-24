@@ -11,8 +11,8 @@ LOGGING['loggers'].update({
     'django.db.backends': {
         'handlers': ['null'],
         'level': 'DEBUG',
-        'propagate': True,
-    }
+        'propagate': False,
+    },
 })
 
 

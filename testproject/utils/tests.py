@@ -74,6 +74,10 @@ class TestTimedelta(TestCase):
                                                   seconds=7)
 
     def test_str_to_timedelta(self):
+        self.assertRaises(ValueError,
+                          str_to_timedelta,
+                          self.timedelta)
+
         self.assertEqual(str_to_timedelta('00:00'), self.timedelta)
         self.assertEqual(str_to_timedelta('00:00:01'), self.timedelta001)
         self.assertEqual(str_to_timedelta('00:40'), self.timedelta0400)
@@ -87,6 +91,22 @@ class TestTimedelta(TestCase):
         self.assertEqual(str_to_timedelta('27:41'), self.timedelta27410)
         self.assertEqual(str_to_timedelta('27:41:14'), self.timedelta274114)
         self.assertEqual(str_to_timedelta('2009-10-21 12:00'), None)
+        self.assertEqual(str_to_timedelta('1d 3:41'), self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1 day, 3:41'), self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1d 3:41:14'), self.timedelta274114)
+        self.assertEqual(str_to_timedelta('1 day, 3:41:14'),
+                         self.timedelta274114)
+        self.assertEqual(str_to_timedelta('2w 4d 1:28'), self.timedelta433280)
+        self.assertEqual(str_to_timedelta('2 weeks, 4 days, 1:28'),
+                         self.timedelta433280)
+        self.assertEqual(str_to_timedelta('18 days, 1:28'),
+                         self.timedelta433280)
+        self.assertEqual(str_to_timedelta('2w 4d 1:28:07'),
+                         self.timedelta433287)
+        self.assertEqual(str_to_timedelta('2 weeks, 4 days, 1:28:07'),
+                         self.timedelta433287)
+        self.assertEqual(str_to_timedelta('18 days, 1:28:07'),
+                         self.timedelta433287)
 
     def test_timedelta_average(self):
         avg = timedelta_average(self.timedelta0400, self.timedelta0400)
@@ -113,7 +133,7 @@ class TestTimedelta(TestCase):
         url = reverse('timedelta_json_encoder')
         response = self.client.get(url)
         self.assertContains(response,
-                            '"timedelta": "%d:%d"' % (NOW.hour, NOW.minute))
+                            '"timedelta": "%d:%02d"' % (NOW.hour, NOW.minute))
 
     def test_timedelta_seconds(self):
         self.assertEqual(timedelta_seconds(self.timedelta), 0)
@@ -122,7 +142,9 @@ class TestTimedelta(TestCase):
         self.assertEqual(timedelta_seconds(self.timedelta27410), 99660)
 
     def test_timedelta_to_str(self):
-        self.assertEqual(timedelta_to_str(datetime.date.today()), '')
+        self.assertRaises(ValueError,
+                          timedelta_to_str,
+                          datetime.date.today())
 
         self.assertEqual(timedelta_to_str(self.timedelta), '0:00')
         self.assertEqual(timedelta_to_str(self.timedelta001), '0:00')
