@@ -60,7 +60,7 @@ class memoized(object):
         return self.func.__doc__
 
 
-def render_to(template_path):
+def render_to(template_path, mimetype=None):
     """
     Expect the dict from view. Render returned dict with RequestContext.
     """
@@ -79,6 +79,8 @@ def render_to(template_path):
                 kwargs['mimetype'] = output.pop('MIME_TYPE')
             elif 'MIMETYPE' in output:
                 kwargs['mimetype'] = output.pop('MIMETYPE')
+            elif mimetype:
+                kwargs['mimetype'] = mimetype
 
             if 'TEMPLATE' in output:
                 template = output.pop('TEMPLATE')
