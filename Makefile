@@ -17,6 +17,9 @@ DJANGO_SHELL?=shell_plus
 TEST?={base,core,db,shortcuts,templatetags,utils}
 TEST_ARGS?=--settings=$(project).settings_testing
 
+# Read current version of Kikola
+VERSION=`$(python) -c 'import kikola; print kikola.get_version()'`
+
 clean:
 	find . -name '*.pyc' -delete
 	$(python) setup.py clean
@@ -37,3 +40,8 @@ shell:
 
 test:
 	$(manage) test $(TEST_ARGS) $(TEST)
+
+version:
+	git tag -a $(VERSION) -f -m '$(VERSION) release'
+	git push --tags origin master
+	$(python) setup.py register sdist upload
