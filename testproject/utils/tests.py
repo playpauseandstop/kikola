@@ -108,6 +108,48 @@ class TestTimedelta(TestCase):
         self.assertEqual(str_to_timedelta('18 days, 1:28:07'),
                          self.timedelta433287)
 
+    def test_str_to_timedelta_user_format(self):
+        self.assertRaises(ValueError, str_to_timedelta, '00:00', 'H:i:s')
+        self.assertRaises(ValueError, str_to_timedelta, '00:00:1', 'G:i:s')
+        self.assertRaises(ValueError, str_to_timedelta, '2w 4d 1:28:07', 'r')
+        self.assertRaises(ValueError,
+                          str_to_timedelta,
+                          '2 weeks, 4 days, 1:28:07',
+                          'R')
+
+        self.assertEqual(str_to_timedelta('00:40', 'H:i'), self.timedelta0400)
+        self.assertEqual(str_to_timedelta('0:40', 'G:i'), self.timedelta0400)
+
+        for format in ('G:i:s', 'H:i:s'):
+            self.assertEqual(str_to_timedelta('433:28:07', format),
+                             self.timedelta433287)
+
+        for format in ('G:i:s', 'H:i:s', 'f', 'F', 'r', 'R'):
+            self.assertEqual(str_to_timedelta('00:40:01', format),
+                             self.timedelta0401)
+
+        self.assertEqual(str_to_timedelta('1d 3:41', 'f'), self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1d 3:41:00', 'f'),
+                         self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1d 3:41:00', 'r'),
+                         self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1 day, 3:41', 'F'),
+                         self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1 day, 3:41:00', 'F'),
+                         self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1 day, 3:41:00', 'R'),
+                         self.timedelta27410)
+        self.assertEqual(str_to_timedelta('1 day, 3:41:00', 'j l, G:i:s'),
+                         self.timedelta27410)
+
+        self.assertEqual(str_to_timedelta('2w 4d 1:28:07', 'f'),
+                         self.timedelta433287)
+        self.assertEqual(str_to_timedelta('2 weeks, 4 days, 1:28:07', 'F'),
+                         self.timedelta433287)
+        self.assertEqual(str_to_timedelta('2 weeks, 4 days, 1:28:07',
+                                          'W L, w m, G:i:s'),
+                         self.timedelta433287)
+
     def test_timedelta_average(self):
         avg = timedelta_average(self.timedelta0400, self.timedelta0400)
         self.assertEqual(avg, self.timedelta0400)
@@ -157,36 +199,79 @@ class TestTimedelta(TestCase):
         self.assertEqual(timedelta_to_str(self.timedelta274114, 'G:i:s'),
                          '27:41:14')
 
-        self.assertEqual(timedelta_to_str(self.timedelta7350, 'f'), '7:35:00')
+        self.assertEqual(timedelta_to_str(self.timedelta7350, 'f'), '7:35')
         self.assertEqual(timedelta_to_str(self.timedelta73510, 'f'), '7:35:10')
         self.assertEqual(timedelta_to_str(self.timedelta24100, 'f'),
-                         '1d 0:10:00')
+                         '1d 0:10')
         self.assertEqual(timedelta_to_str(self.timedelta24105, 'f'),
                          '1d 0:10:05')
         self.assertEqual(timedelta_to_str(self.timedelta27410, 'f'),
-                         '1d 3:41:00')
+                         '1d 3:41')
         self.assertEqual(timedelta_to_str(self.timedelta274114, 'f'),
                          '1d 3:41:14'),
         self.assertEqual(timedelta_to_str(self.timedelta16800, 'f'),
-                         '1w 0:00:00')
+                         '1w 0:00')
         self.assertEqual(timedelta_to_str(self.timedelta433280, 'f'),
-                         '2w 4d 1:28:00')
+                         '2w 4d 1:28')
         self.assertEqual(timedelta_to_str(self.timedelta433287, 'f'),
                          '2w 4d 1:28:07')
 
-        self.assertEqual(timedelta_to_str(self.timedelta7350, 'F'), '7:35:00')
+        self.assertEqual(timedelta_to_str(self.timedelta7350, 'F'), '7:35')
         self.assertEqual(timedelta_to_str(self.timedelta73510, 'F'), '7:35:10')
         self.assertEqual(timedelta_to_str(self.timedelta24100, 'F'),
-                         '1 day, 0:10:00')
+                         '1 day, 0:10')
         self.assertEqual(timedelta_to_str(self.timedelta24105, 'F'),
                          '1 day, 0:10:05')
         self.assertEqual(timedelta_to_str(self.timedelta27410, 'F'),
-                         '1 day, 3:41:00')
+                         '1 day, 3:41')
         self.assertEqual(timedelta_to_str(self.timedelta274114, 'F'),
                          '1 day, 3:41:14'),
         self.assertEqual(timedelta_to_str(self.timedelta16800, 'F'),
-                         '1 week, 0:00:00')
+                         '1 week, 0:00')
         self.assertEqual(timedelta_to_str(self.timedelta433280, 'F'),
-                         '2 weeks, 4 days, 1:28:00')
+                         '2 weeks, 4 days, 1:28')
         self.assertEqual(timedelta_to_str(self.timedelta433287, 'F'),
                          '2 weeks, 4 days, 1:28:07')
+
+    def test_timedelta_to_str_formats(self):
+        delta = self.timedelta27410
+
+        self.assertEqual(timedelta_to_str(delta, 'd'), '01')
+        self.assertEqual(timedelta_to_str(delta, 'g'), '3')
+        self.assertEqual(timedelta_to_str(delta, 'G'), '27')
+        self.assertEqual(timedelta_to_str(delta, 'h'), '03')
+        self.assertEqual(timedelta_to_str(delta, 'H'), '27')
+        self.assertEqual(timedelta_to_str(delta, 'i'), '41')
+        self.assertEqual(timedelta_to_str(delta, 'I'), '1661')
+        self.assertEqual(timedelta_to_str(delta, 'j'), '1')
+        self.assertEqual(timedelta_to_str(delta, 'l'), 'day')
+        self.assertEqual(timedelta_to_str(delta, 'L'), 'weeks')
+        self.assertEqual(timedelta_to_str(delta, 'm'), 'day')
+        self.assertEqual(timedelta_to_str(delta, 'r'), '1d 3:41:00')
+        self.assertEqual(timedelta_to_str(delta, 'R'), '1 day, 3:41:00')
+        self.assertEqual(timedelta_to_str(delta, 's'), '00')
+        self.assertEqual(timedelta_to_str(delta, 'S'), '99660')
+        self.assertEqual(timedelta_to_str(delta, 'u'), '0')
+        self.assertEqual(timedelta_to_str(delta, 'w'), '1')
+        self.assertEqual(timedelta_to_str(delta, 'W'), '0')
+
+        delta = self.timedelta433287
+
+        self.assertEqual(timedelta_to_str(delta, 'd'), '18')
+        self.assertEqual(timedelta_to_str(delta, 'g'), '1')
+        self.assertEqual(timedelta_to_str(delta, 'G'), '433')
+        self.assertEqual(timedelta_to_str(delta, 'h'), '01')
+        self.assertEqual(timedelta_to_str(delta, 'H'), '433')
+        self.assertEqual(timedelta_to_str(delta, 'i'), '28')
+        self.assertEqual(timedelta_to_str(delta, 'I'), '26008')
+        self.assertEqual(timedelta_to_str(delta, 'j'), '18')
+        self.assertEqual(timedelta_to_str(delta, 'l'), 'days')
+        self.assertEqual(timedelta_to_str(delta, 'L'), 'weeks')
+        self.assertEqual(timedelta_to_str(delta, 'm'), 'days')
+        self.assertEqual(timedelta_to_str(delta, 'r'), '18d 1:28:07')
+        self.assertEqual(timedelta_to_str(delta, 'R'), '18 days, 1:28:07')
+        self.assertEqual(timedelta_to_str(delta, 's'), '07')
+        self.assertEqual(timedelta_to_str(delta, 'S'), '1560487')
+        self.assertEqual(timedelta_to_str(delta, 'u'), '0')
+        self.assertEqual(timedelta_to_str(delta, 'w'), '4')
+        self.assertEqual(timedelta_to_str(delta, 'W'), '2')
