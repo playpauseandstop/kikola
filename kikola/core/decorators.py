@@ -14,6 +14,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.defaultfilters import date as date_filter
 
+from kikola.shortcuts import conf
+
 
 __all__ = ('memoized', 'render_to', 'render_to_json', 'smart_datetime')
 
@@ -75,6 +77,8 @@ def render_to(template_path):
 
             if 'MIME_TYPE' in output:
                 kwargs['mimetype'] = output.pop('MIME_TYPE')
+            elif 'MIMETYPE' in output:
+                kwargs['mimetype'] = output.pop('MIMETYPE')
 
             if 'TEMPLATE' in output:
                 template = output.pop('TEMPLATE')
@@ -134,8 +138,9 @@ def smart_datetime(datetime_format=None, time_format=None, compare_date=None):
     def datetime_decorator(func, datetime_format=None, time_format=None,
                            compare_date=None):
         compare_date = compare_date or TODAY()
-        datetime_format = datetime_format or 'F d, H:i'
-        time_format = time_format or 'H:i'
+        datetime_format = \
+            datetime_format or conf('DATETIME_FORMAT', 'F d, H:i')
+        time_format = time_format or conf('TIME_FORMAT', 'H:i')
 
         @wraps(func)
         def wrapper(*args, **kwargs):
