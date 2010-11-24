@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sitemaps',
+    'django.contrib.sites',
 
     'django_extensions',
     'kikola',
@@ -108,3 +110,4 @@ TEMPLATE_DIRS = (
 
 # Other Django-related settings
 ROOT_URLCONF = 'testproject.urls'
+SITE_ID = 1

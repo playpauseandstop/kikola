@@ -17,5 +17,6 @@ else:
 
 
 urlpatterns += patterns('',
+    (r'^core/', include('testproject.core.urls')),
     (r'^utils/', include('testproject.utils.urls')),
 )
