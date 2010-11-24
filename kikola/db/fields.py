@@ -221,6 +221,8 @@ models.Model.prepare_database_save = \
 if VERSION[0] == 1 and VERSION[1] < 2:
     fields = (JSONField, MonthField, PickleField, TimeDeltaField, URLField)
     for field in fields:
-        if not hasattr(field, 'get_prep_value'):
+        method = getattr(field, 'get_prep_value', None)
+        if method is None:
             continue
-        field.get_db_prep_value = field.get_prep_value
+        setattr(field, 'get_db_prep_value', method)
+        delattr(field, 'get_prep_value')
