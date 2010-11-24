@@ -3,7 +3,6 @@
 import os
 
 from distutils.core import setup
-from glob import glob
 
 
 DIRNAME = os.path.dirname(__file__)
