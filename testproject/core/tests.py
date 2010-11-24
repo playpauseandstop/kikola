@@ -122,6 +122,12 @@ class TestDecorators(TestCase):
         self.assertEqual(response['Content-Type'], 'text/plain')
         self.assertContains(response, 'It works!', count=1)
 
+        url = reverse('decorators_render_to_with_mimetype_in_dict')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/plain')
+        self.assertContains(response, 'It works!', count=1)
+
     def test_render_to_json(self):
         url = reverse('decorators_render_to_json')
         response = self.client.get(url)

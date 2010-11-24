@@ -12,8 +12,13 @@ def decorators_render_to(request):
     return {'text': 'It works!'}
 
 
-@render_to('core/render_to.html')
+@render_to('core/render_to.txt', mimetype='text/plain')
 def decorators_render_to_with_mimetype(request):
+    return {'text': 'It works!'}
+
+
+@render_to('core/render_to.html')
+def decorators_render_to_with_mimetype_in_dict(request):
     return {'MIMETYPE': 'text/plain',
             'TEMPLATE': 'core/render_to.txt',
             'text': 'It works!'}
