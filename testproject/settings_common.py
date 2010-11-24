@@ -98,15 +98,12 @@ STATIC_ROOT = rel('static')
 STATIC_URL = '/static/'
 
 # Template settings
-TEMPLATE_CONTEXT_PROCESSORS = (
+TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.i18n',
     'django.core.context_processors.static',
-)
-TEMPLATE_DIRS = (
-    rel('templates'),
-)
+]
 
 # Other Django-related settings
 ROOT_URLCONF = 'testproject.urls'

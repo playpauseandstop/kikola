@@ -49,7 +49,7 @@ class TestContextProcesors(TestCase):
         self.assertContains(response,
                             '"REQUEST_PATH": "%s"' % url)
 
-        response = self.client.get(url + '?q=Query')
+        response = self.client.get(url, {'q': 'Query'})
         self.assertContains(response,
                             '"REQUEST_ABSOLUTE_URI": "http://testserver' \
                             '%s?q=Query"' % url)
