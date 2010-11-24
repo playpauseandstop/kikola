@@ -49,15 +49,13 @@ __all__ = ('TimedeltaJSONEncoder', 'str_to_timedelta', 'timedelta_average',
            'timedelta_div', 'timedelta_seconds', 'timedelta_to_str')
 
 
+SECONDS_PER_DAY = 86400
 TIMEDELTA_FORMATS = {
     'G': '%(hours)d',
     'H': '%(hours)02d',
     'i': '%(minutes)02d',
     's': '%(seconds)02d',
 }
-
-timedelta_re = \
-    re.compile(r'(?P<hours>\d+):(?P<minutes>\d+)(:(?P<seconds>\d+))?')
 
 
 class TimedeltaJSONEncoder(DjangoJSONEncoder):
@@ -73,19 +71,36 @@ class TimedeltaJSONEncoder(DjangoJSONEncoder):
         return super(TimedeltaJSONEncoder, self).default(value)
 
 
-def str_to_timedelta(value):
+def str_to_timedelta(value, format=None):
     """
     Convert string value to timedelta instance if possible.
+
+    Function would be tried timedelta formats in next order:
+
+    * (G|H):i(:s)
+    * (F|f|O|o)
+
+    If cannot convert ``value`` to ``datetime.timedelta`` instance - function
+    returns ``None`` as result.
     """
-    matched = timedelta_re.match(value)
+    if not isinstance(value, basestring):
+        raise ValueError('Only "basestring" instances supported by this ' \
+                         'function. You use %s.' % type(value))
 
-    if matched:
-        data = dict([(key, force_int(value, default=0)) \
-                     for key, value in matched.groupdict().items()])
+    regexps = (
+        r'^(?P<hours>\d+):(?P<minutes>\d{2})(:(?P<seconds>\d{2}))?$',
+        r'^((?P<weeks>\d+)(w| weeks?,) )?(?P<days>\d+)(d| days?,) ' \
+        r'(?P<hours>\d{1,2}):(?P<minutes>\d{2})(:(?P<seconds>\d{2}))?$',
+    )
 
-        return datetime.timedelta(hours=data['hours'],
-                                  minutes=data['minutes'],
-                                  seconds=data['seconds'])
+    for regexp in regexps:
+        timedelta_re = re.compile(regexp)
+        matched = timedelta_re.match(value)
+
+        if matched:
+            data = dict([(key, force_int(value, 0)) \
+                        for key, value in matched.groupdict().items()])
+            return datetime.timedelta(**data)
 
     return None
 
@@ -119,12 +134,7 @@ def timedelta_seconds(value):
 
     By default, Python returns only one day seconds, not all timedelta seconds.
     """
-    seconds = value.seconds
-
-    if value.days:
-        seconds += value.days * 24 * 60 * 60
-
-    return seconds
+    return SECONDS_PER_DAY * value.days + value.seconds
 
 
 def timedelta_to_str(value, format=None):
@@ -135,11 +145,22 @@ def timedelta_to_str(value, format=None):
     Use the same format as Django built-in ``{% now %}`` template tag, but
     support only "G", "H", "i" and "s" format strings.
 
-    Also, you can use one specific format, "F" or "f". This would format
-    timedelta "433:28" as "2 weeks, 4 days, 1:28:00" or "2w 4d 1:28:00".
+    Also, you can use one specific format, "O", "o", "F" or "f". This would
+    format timedelta "433:28" as "18 days, 1:28:00", "18d 1:28:00",
+    "2 weeks, 4 days, 1:28:00" or "2w 4d 1:28:00".
+
+    "O" means "O"riginal, this format uses for built-in ``datetime.timedelta``
+    string representation.
+
+    "o" means short "original".
+
+    "F" means "F"ull with weeks.
+
+    "f" means short "f"ull with weeks.
     """
     if not isinstance(value, datetime.timedelta):
-        return u''
+        raise ValueError('Only "datetime.timedelta" instances supported ' \
+                         'by this function. You use %s.' % type(value))
 
     data = {
         'days': value.days,

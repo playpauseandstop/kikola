@@ -51,4 +51,7 @@ register = Library()
 
 @register.filter
 def timedelta(value, format=None):
-    return timedelta_to_str(value, format)
+    try:
+        return timedelta_to_str(value, format)
+    except ValueError:
+        return u''
