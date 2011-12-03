@@ -6,6 +6,7 @@ dist/
 env/
 env*/
 
+bootstrap.cfg
 MANIFEST
 settings_local.py
 settings_testing_local.py

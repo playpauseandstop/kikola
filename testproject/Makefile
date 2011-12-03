@@ -3,17 +3,17 @@
 # Basic settings
 env?=env
 project?=testproject
-python?=python -Wignore::DeprecationWarning
+python?=$(env)/bin/python -Wignore::DeprecationWarning
 
 manage=PYTHONPATH=. $(python) manage.py
 
 # Settings for runserver command
 IP?=0.0.0.0
-PORT?=8195
+PORT?=8197
 
 # Settings for runserver and shell commands
-DJANGO_RUNSERVER?=runserver
-DJANGO_SHELL?=shell
+DJANGO_RUNSERVER?=runserver_plus
+DJANGO_SHELL?=shell_plus
 
 clean:
 	find . -name '*.pyc' -delete
@@ -39,4 +39,4 @@ syncdb:
 	$(manage) syncdb --noinput
 
 test:
-	$(manage) test
+	$(manage) test --settings=settings_testing base core db shortcuts templatetags utils
