@@ -16,15 +16,20 @@ from kikola import forms
 from kikola.shortcuts import conf
 from kikola.utils import str_to_timedelta, timedelta_seconds
 
-
-__all__ = ('JSONField', 'MonthField', 'PickleField', 'TimeDeltaField',
-           'URLField')
-
-
 if conf('USE_CPICKLE', False):
     import cPickle as pickle
 else:
     import pickle
+
+# Try to add custom fields to ``south`` app
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    add_introspection_rules = lambda *args, **kwargs: None
+
+
+__all__ = ('JSONField', 'MonthField', 'PickleField', 'TimeDeltaField',
+           'URLField')
 
 
 class JSONField(models.TextField):
@@ -36,6 +41,8 @@ class JSONField(models.TextField):
     would be used.
     """
     __metaclass__ = models.SubfieldBase
+
+    encoder_cls = None
 
     def __init__(self, *args, **kwargs):
         self.encoder_cls = kwargs.pop('encoder_cls', DjangoJSONEncoder)
@@ -216,9 +223,21 @@ models.Model.prepare_database_save = \
     picklefield(models.Model.prepare_database_save)
 
 
+# Add south support
+rules = [
+    ((JSONField, ), [], {'encoder_cls': ['encoder_cls', {}]}),
+    ((MonthField, ), [], {}),
+    ((PickleField, ), [], {}),
+    ((TimeDeltaField, ), [], {}),
+    ((URLField, ), [], {}),
+]
+
+add_introspection_rules(rules, ['^kikola\.db\.fields'])
+
+
 # Rename ``get_prep_value`` methods to ``get_db_prep_value`` for compatible
 # with Django < 1.2
-if VERSION[0] == 1 and VERSION[1] < 2:
+if VERSION[:2] < (1, 2):
     fields = (JSONField, MonthField, PickleField, TimeDeltaField, URLField)
     for field in fields:
         method = getattr(field, 'get_prep_value', None)
