@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import os
+import shutil
+import sys
 
 from random import randint
+from StringIO import StringIO
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import TestCase
 
 from testproject.db.models import DummyObject, JSONModel, MonthModel, \
@@ -323,6 +329,27 @@ class TestPickleField(TestCase):
 
         obj = self.check('unicode', first, create=True)
         self.check('unicode', second, exists=obj, delete=True)
+
+
+class TestSouthSupport(TestCase):
+
+    def tearDown(self):
+        sys.stderr, sys.stdout = self.old_stderr, self.old_stdout
+        dirname = os.path.join(os.path.dirname(__file__), 'migrations')
+        shutil.rmtree(dirname)
+
+    def test_south_support(self):
+        self.old_stderr, self.old_stdout = sys.stderr, sys.stdout
+        sys.stderr, sys.stdout = StringIO(), StringIO()
+
+        try:
+            call_command('schemamigration', 'db', initial=True, verbosity=0)
+        except:
+            sys.stderr.seek(0)
+            command_error = sys.stderr.read()
+
+            assert False, 'Cannot build initial migration for ``db`` app.' \
+                          '\n\n%s' % command_error
 
 
 class TestTimeDeltaField(TestCase):
