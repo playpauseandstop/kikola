@@ -1,10 +1,13 @@
 import os
+import sys
 
 from django import VERSION
 
 
 rel = lambda *x: os.path.abspath(os.path.join(os.path.dirname(__file__), *x))
 
+# Add parent directory to able use ``kikola`` app
+sys.path.append(rel('..'))
 
 # Administration settings
 ADMIN_MEDIA_PREFIX = '/static/admin/'
@@ -32,6 +35,7 @@ INSTALLED_APPS = [
 
     'django_extensions',
     'kikola',
+    'south',
 
     'testproject.base',
     'testproject.core',

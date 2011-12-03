@@ -5,7 +5,6 @@ from settings import *
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-
 # Fix logging settings
 LOGGING['loggers'].update({
     'django.db.backends': {
@@ -14,6 +13,10 @@ LOGGING['loggers'].update({
         'propagate': False,
     },
 })
+
+# South settings
+SKIP_SOUTH_TESTS = True
+SOUTH_TESTS_MIGRATE = False
 
 
 try:
